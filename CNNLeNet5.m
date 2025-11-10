@@ -72,9 +72,9 @@ layers = [
 % Options d'entraînement
 % ------------------------------------------------------------
 options = trainingOptions('adam', ...
-    'MaxEpochs', 10, ...
+    'MaxEpochs', 5, ...
     'MiniBatchSize', 32, ...  % léger compromis entre stabilité et mémoire
-    'InitialLearnRate', 1e-4, ...
+    'InitialLearnRate', 1e-3, ...
     'Shuffle', 'every-epoch', ...
     'ValidationData', augVal, ...
     'ValidationFrequency', 50, ...
@@ -103,24 +103,7 @@ cm.RowSummary = 'row-normalized';
 cm.ColumnSummary = 'column-normalized';
 
 % ------------------------------------------------------------
-% Prédictions sur le test set + génération JSON
+% Sauvegarde du réseau entraîné
 % ------------------------------------------------------------
-[YPredTest, ~] = classify(netLeNet, augTest);
-
-fprintf('Génération du fichier JSON...\n');
-filePaths = imdsTest.Files;
-n = numel(filePaths);
-jsonStruct = struct;
-
-for i = 1:n
-    [~, name, ~] = fileparts(filePaths{i});
-    jsonStruct.(name) = char(YPredTest(i));
-end
-
-jsonText = jsonencode(jsonStruct);
-
-fid = fopen('predictions_lenet5.json','w');
-fwrite(fid, jsonText, 'char');
-fclose(fid);
-
-fprintf('Fichier predictions_lenet5.json généré avec succès !\n');
+save('net_lenet5_512.mat', 'netLeNet');
+fprintf('Modèle sauvegardé sous : net_lenet5_512.mat\n');
