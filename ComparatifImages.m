@@ -1,5 +1,5 @@
 %% ------------------------------------------------------------
-% Comparaison côte à côte : 512x512 vs 224x224
+% Comparaison visuelle à même échelle : 512x512 vs 128x128 (affichées identiques)
 % ------------------------------------------------------------
 
 clc; clear; close all;
@@ -21,30 +21,33 @@ sampleFiles = imds.Files(idx);
 sampleLabels = imds.Labels(idx);
 
 % ------------------------------------------------------------
-% Paramètres de redimensionnement
+% Paramètres
 % ------------------------------------------------------------
 inputSizeLarge = [512 512];
-inputSizeSmall = [224 224];
+inputSizeSmall = [128 128];
 
 % ------------------------------------------------------------
-% Affichage côte à côte
+% Affichage côte à côte à la même échelle d'affichage
 % ------------------------------------------------------------
-figure('Name','Comparaison visuelle 512x512 vs 224x224', ...
+figure('Name','Comparaison visuelle à même échelle : 512x512 vs 128x128', ...
        'NumberTitle','off', ...
        'Position',[100 100 1200 800]);
 
 for i = 1:numImages
     I = imread(sampleFiles{i});
-    I_large = imresize(I, inputSizeLarge);
-    I_small = imresize(I, inputSizeSmall);
-
-    % Affichage côte à côte
+    
+    % Redimensionnement
+    I_large = imresize(I, inputSizeLarge);   % référence 512x512
+    I_small = imresize(I, inputSizeSmall);   % réduction à 128x128
+    I_small_upscaled = imresize(I_small, inputSizeLarge, 'bicubic'); % ré-agrandi à 512x512 pour affichage
+    
+    % Affichage côte à côte à même taille d'affichage
     subplot(3,4,i);
-    imshowpair(I_large, I_small, 'montage');
-    title(sprintf('%s\n512x512  ←→  224x224', string(sampleLabels(i))), ...
-          'FontSize', 10, 'Interpreter', 'none');
+    imshowpair(I_large, I_small_upscaled, 'montage');
+    title(sprintf('%s\n512x512 (gauche)  vs  128x128 upscalé (droite)', string(sampleLabels(i))), ...
+        'FontSize', 9, 'Interpreter', 'none');
 end
 
-sgtitle('Comparaison d''échelle : images 512x512 vs 224x224 (Food-11)', 'FontSize', 14);
+sgtitle('Comparaison à échelle identique : images originales 512x512 vs versions 128x128 (Food-11)', 'FontSize', 14);
 
-fprintf('Affichage terminé : 12 comparaisons côte à côte (512 vs 224).\n');
+fprintf('Affichage terminé : 12 comparaisons côte à côte (512 vs 128, même échelle visuelle).\n');
