@@ -10,8 +10,6 @@ clc; clear; close all;
 dataDir = fullfile('dataset');
 trainDir = fullfile(dataDir, 'train');
 testDir  = fullfile(dataDir, 'test');
-f = figure;
-r = rendererinfo(f)
 
 % Création du datastore (train + labels)
 imds = imageDatastore(trainDir, ...
