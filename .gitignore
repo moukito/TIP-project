@@ -2,3 +2,4 @@
 .venv/
 settings.json
 predictions.json
+net_lenet5_512.mat
