@@ -1,1 +1,4 @@
 /dataset
+.venv/
+settings.json
+predictions.json
