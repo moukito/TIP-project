@@ -109,7 +109,7 @@ options = trainingOptions('adam', ...
     'ExecutionEnvironment', 'auto', ...
     'MiniBatchSize', miniBatchSize, ...
     'MaxEpochs', 10, ...
-    'InitialLearnRate', 1e-4, ...   % bien adapté pour du fine-tuning
+    'InitialLearnRate', 1e-4, ...  
     'Shuffle', 'every-epoch', ...
     'ValidationData', augVal, ...
     'ValidationFrequency', valFreq, ...
@@ -143,21 +143,21 @@ save('net_resnet18_food11.mat', 'netResNet18');
 fprintf('Modèle sauvegardé sous : net_resnet18_food11.mat\n');
 
 %% ------------------------------------------------------------
-% ----- FONCTION LOCALE : lecture + augmentation couleur -----
+% FONCTION LOCALE : lecture + augmentation couleur 
 % ------------------------------------------------------------
 function Iout = readTrainWithColorAug(filename)
     I = imread(filename);
     I = im2double(I);
 
-    % Variation luminosité
+    % On varie un peu la luminosité pour simuler différentes conditions d'éclairage
     brightnessFactor = 0.8 + 0.4*rand();    % [0.8, 1.2]
     I = I * brightnessFactor;
 
-    % Variation contraste
+    % Et on ajuste le contraste aussi
     contrastFactor = 0.8 + 0.4*rand();      % [0.8, 1.2]
     meanVal = mean(I(:));
     I = (I - meanVal) * contrastFactor + meanVal;
 
-    % Clamp + retour en uint8
+    % On s'assure que les valeurs restent entre 0 et 1, puis on convertit en uint8
     Iout = im2uint8(min(max(I,0),1));
 end

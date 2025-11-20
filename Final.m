@@ -29,11 +29,21 @@ net = efficientnetb0;
 inputSize  = net.Layers(1).InputSize;   % [224 224 3]
 numClasses = numel(categories(imdsTrain.Labels));
 
+% Class weights pour renforcer dairy et fried_food
+classNames = categories(imdsTrain.Labels);
+weights = ones(numClasses,1);
+idxDairy = find(strcmp(classNames, 'dairy'));
+idxFried = find(strcmp(classNames, 'fried_food'));
+weights(idxDairy) = 1.1;
+weights(idxFried) = 1.1;
+
 %% ------------------------------------------------------------
 % Stratégie d’amélioration ciblée
 % ------------------------------------------------------------
-% La photométrie ne s’applique que sur : bread, dairy, fried_food
-targetClasses = ["bread","dairy","fried_food"];
+% Dans le but d’obtenir de meilleurs résultats, nous allons adopter une approche d’amélioration ciblée plutôt que globale. L’analyse des matrices de confusion a montré que certaines classes, comme rice ou noodles-pasta, sont déjà bien reconnues malgré leur faible représentation, tandis que d’autres, notamment dairy et fried food, restent difficiles à distinguer. Plutôt que de modifier la distribution du dataset (interdiction d’après le sujet), nous concentrerons nos ajustements sur ces classes problématiques. Concrètement, nous renforcerons leur influence pendant l’entraînement en pondérant la fonction de perte (class weights) de manière à ce que les erreurs sur ces catégories comptent davantage. En parallèle, une augmentation photométrique sélective (variations légères de luminosité, de contraste et de rotation) sera appliquée uniquement aux images de ces classes, afin d’accroître la diversité visuelle perçue par le réseau tout en diminuant le temps d'entraînement. Enfin, nous avons pu réaliser des essais complémentaires grâce à la gentillesse d’un camarade qui nous a donné temporairement accès à un ordinateur plus performant. Cela nous a permis d’augmenter la résolution d’entrée de 128×128 à 224×224 pour les modèles pré-entraînés. Rien que cette modification, sans changer aucun autre hyperparamètre, a entraîné une hausse d’environ 1 % de l’accuracy sur l’ensemble de validation.
+
+% La photométrie ne s’applique que sur : dairy, fried_food
+targetClasses = ["dairy","fried_food"];
 
 imdsTrain.ReadFcn = @(filename) readTrainSelectivePhotometry(filename, targetClasses);
 
@@ -73,7 +83,7 @@ newFcLayer = fullyConnectedLayer(numClasses, ...
     'BiasLearnRateFactor',10);
 
 newSoftmaxLayer = softmaxLayer('Name','softmax_food11');
-newClassLayer   = classificationLayer('Name','classoutput');
+newClassLayer   = classificationLayer('Name','classoutput', 'ClassWeights', weights);
 
 lgraph = replaceLayer(lgraph, oldFcName, newFcLayer);
 lgraph = replaceLayer(lgraph, oldSoftName, newSoftmaxLayer);
